@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* small height helper to make map visible */
+#map { height: 500px; }
