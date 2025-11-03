@@ -3,6 +3,9 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
 import api from '../utils/apiClient'
 
+// Import Leaflet CSS
+import 'leaflet/dist/leaflet.css'
+
 // fix default marker icon path for bundlers
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({

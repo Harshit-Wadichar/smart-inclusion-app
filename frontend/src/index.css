@@ -4,4 +4,5 @@
 
 
 /* small height helper to make map visible */
-#map { height: 500px; }
+import 'leaflet/dist/leaflet.css';
+#map { height: 500px;/ }
