@@ -1,60 +1,106 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import api from '../utils/apiClient'
-import { useAdminStore } from '../store/useAdminStore'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 
-export default function AdminLogin() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+const AdminLogin = () => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  })
   const [loading, setLoading] = useState(false)
+  const { login } = useAuth()
   const navigate = useNavigate()
-  const setToken = useAdminStore(s => s.setToken)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    try {
-      const res = await api.post('/admin/login', { email, password })
-      if (res.data && res.data.token) {
-        setToken(res.data.token)
-        // set token on api client for future requests (optional)
-        api.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`
-        navigate('/admin')
-      } else {
-        alert('Login failed: no token returned')
-      }
-    } catch (err) {
-      console.error(err)
-      alert(err.response?.data?.message || 'Login failed')
-    } finally {
-      setLoading(false)
+    
+    const result = await login(formData.email, formData.password)
+    
+    if (result.success) {
+      navigate('/admin/dashboard')
+    } else {
+      alert(result.error)
     }
+    
+    setLoading(false)
   }
 
   return (
-    <div className="max-w-md mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Admin Login</h2>
-      <form onSubmit={handleSubmit} className="space-y-3 bg-white p-4 border rounded">
-        <input
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          placeholder="Email"
-          type="email"
-          required
-          className="w-full p-2 border rounded"
-        />
-        <input
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          placeholder="Password"
-          type="password"
-          required
-          className="w-full p-2 border rounded"
-        />
-        <button disabled={loading} className="w-full bg-blue-600 text-white px-4 py-2 rounded">
-          {loading ? 'Logging in...' : 'Login'}
-        </button>
-      </form>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="flex justify-center">
+          <div className="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center">
+            <span className="text-white font-bold text-xl">SI</span>
+          </div>
+        </div>
+        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
+          Admin Login
+        </h2>
+        <p className="mt-2 text-center text-sm text-gray-600">
+          Access the Smart Inclusion administration dashboard
+        </p>
+      </div>
+
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="card">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email address
+              </label>
+              <div className="mt-1">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  className="input-field"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
+              <div className="mt-1">
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  className="input-field"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full btn-primary disabled:opacity-50"
+              >
+                {loading ? 'Signing in...' : 'Sign in'}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div className="mt-6 text-center">
+          <Link to="/" className="text-primary-600 hover:text-primary-500 font-medium">
+            ← Back to Home
+          </Link>
+        </div>
+      </div>
     </div>
   )
 }
+
+export default AdminLogin

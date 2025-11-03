@@ -1,204 +1,301 @@
-import { useEffect, useState } from 'react'
-import useFetch from '../hooks/useFetch'
-import SchemeForm from '../components/SchemeForm'
-import api from '../utils/apiClient'
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import { useSocket } from '../contexts/SocketContext'
+import { placesAPI, sosAPI, schemesAPI, volunteersAPI } from '../services/api'
 
-function IconVolunteer() {
-    return (
-        <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none">
-            <path d="M12 12a4 4 0 100-8 4 4 0 000 8z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-    )
-}
-function IconScheme() {
-    return (
-        <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none">
-            <path d="M3 13l9-9 9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M21 21H3v-8h18v8z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-    )
-}
-function IconSOS() {
-    return (
-        <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none">
-            <path d="M12 9v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M12 17h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M21 12A9 9 0 1111.999 3 9 9 0 0121 12z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-    )
-}
+const AdminDashboard = () => {
+  const { isAuthenticated, user } = useAuth()
+  const { sosAlerts } = useSocket()
+  const navigate = useNavigate()
+  const [activeTab, setActiveTab] = useState('overview')
+  const [stats, setStats] = useState({
+    places: 0,
+    sos: 0,
+    schemes: 0,
+    volunteers: 0
+  })
+  const [places, setPlaces] = useState([])
+  const [sosRequests, setSosRequests] = useState([])
 
-export default function AdminDashboard() {
-    const { data: volunteers = [], loading: vLoading } = useFetch('/volunteers', [])
-    const { data: schemes = [], loading: sLoading } = useFetch('/schemes', [])
-    const [sosList, setSosList] = useState([])
-    const [loadingSOS, setLoadingSOS] = useState(true)
-
-    useEffect(() => {
-        let mounted = true
-        api.get('/sos')
-            .then(res => { if (mounted) setSosList(res.data || []) })
-            .catch(() => { if (mounted) setSosList([]) })
-            .finally(() => { if (mounted) setLoadingSOS(false) })
-        return () => { mounted = false }
-    }, [])
-
-    const handleClearSOS = async (id) => {
-        try {
-            await api.post('/sos/resolve', { id })
-            setSosList(prev => prev.filter(s => s._id !== id))
-        } catch (err) {
-            console.error(err)
-            alert('Failed to resolve SOS (endpoint might not exist)')
-        }
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/admin/login')
+      return
     }
+    loadDashboardData()
+  }, [isAuthenticated, navigate])
 
-    return (
-        <div className="space-y-6">
-            <header className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">Admin Dashboard</h1>
-                    <p className="mt-1 text-sm text-gray-500">Overview of volunteers, schemes and active SOS alerts</p>
-                </div>
-            </header>
+  const loadDashboardData = async () => {
+    try {
+      const [placesRes, sosRes, schemesRes, volunteersRes] = await Promise.all([
+        placesAPI.getAll(),
+        sosAPI.getAll(),
+        schemesAPI.getAll(),
+        volunteersAPI.getAll()
+      ])
 
-            {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white rounded-lg shadow">
-                    <div className="p-3 bg-white/10 rounded-full">
-                        <IconVolunteer />
-                    </div>
-                    <div>
-                        <div className="text-sm font-medium opacity-90">Volunteers</div>
-                        <div className="text-2xl font-semibold">{vLoading ? '...' : (volunteers || []).length}</div>
-                    </div>
-                </div>
+      setStats({
+        places: placesRes.data.length,
+        sos: sosRes.data.length,
+        schemes: schemesRes.data.length,
+        volunteers: volunteersRes.data.length
+      })
 
-                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-lg shadow">
-                    <div className="p-3 bg-white/10 rounded-full">
-                        <IconScheme />
-                    </div>
-                    <div>
-                        <div className="text-sm font-medium opacity-90">Schemes</div>
-                        <div className="text-2xl font-semibold">{sLoading ? '...' : (schemes || []).length}</div>
-                    </div>
-                </div>
+      setPlaces(placesRes.data.slice(0, 10))
+      setSosRequests(sosRes.data.slice(0, 10))
+    } catch (error) {
+      console.error('Error loading dashboard data:', error)
+    }
+  }
 
-                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-lg shadow">
-                    <div className="p-3 bg-white/10 rounded-full">
-                        <IconSOS />
-                    </div>
-                    <div>
-                        <div className="text-sm font-medium opacity-90">Active SOS</div>
-                        <div className="text-2xl font-semibold">{loadingSOS ? '...' : (sosList || []).length}</div>
-                    </div>
-                </div>
-            </div>
+  const handleDeletePlace = async (id) => {
+    if (window.confirm('Are you sure you want to delete this place?')) {
+      try {
+        await placesAPI.delete(id)
+        setPlaces(places.filter(p => p._id !== id))
+        setStats(prev => ({ ...prev, places: prev.places - 1 }))
+      } catch (error) {
+        alert('Error deleting place: ' + error.response?.data?.msg)
+      }
+    }
+  }
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Scheme Form */}
-                <div className="p-6 bg-white border rounded-lg shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold">Create Scheme</h3>
-                        <span className="text-xs text-gray-400">Quick add</span>
-                    </div>
-                    <div className="space-y-4">
-                        <SchemeForm />
-                    </div>
-                </div>
+  const handleUpdateSosStatus = async (id, status) => {
+    try {
+      await sosAPI.updateStatus(id, status)
+      setSosRequests(prev => 
+        prev.map(sos => sos._id === id ? { ...sos, status } : sos)
+      )
+    } catch (error) {
+      alert('Error updating SOS status: ' + error.response?.data?.msg)
+    }
+  }
 
-                {/* SOS List */}
-                <div className="p-6 bg-white border rounded-lg shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold">Recent SOS Alerts</h3>
-                        <span className="text-xs text-gray-400">{loadingSOS ? 'Loading…' : `${sosList.length} active`}</span>
-                    </div>
+  if (!isAuthenticated) {
+    return null
+  }
 
-                    {loadingSOS && <div className="text-sm text-gray-500">Fetching latest alerts…</div>}
-                    {!loadingSOS && sosList.length === 0 && <div className="text-sm text-gray-500">No active SOS alerts.</div>}
-
-                    <div className="mt-3 space-y-3 max-h-96 overflow-auto pr-2">
-                        {sosList.map(s => (
-                            <div key={s._id || s.createdAt} className="flex flex-col sm:flex-row sm:items-start gap-3 p-3 border rounded-lg hover:shadow-md transition">
-                                <div className="flex-none">
-                                    <div className="w-12 h-12 rounded-full bg-red-100 text-red-700 flex items-center justify-center font-semibold">
-                                        {s.user ? s.user.split(' ').map(n => n[0]).slice(0,2).join('') : 'SOS'}
-                                    </div>
-                                </div>
-
-                                <div className="flex-1">
-                                    <div className="flex items-start justify-between">
-                                        <div>
-                                            <div className="font-semibold">{s.user || 'Anonymous'}</div>
-                                            <div className="text-sm text-gray-600">{s.message}</div>
-                                        </div>
-                                        <div className="text-xs text-gray-400">{new Date(s.createdAt).toLocaleString()}</div>
-                                    </div>
-
-                                    {s.location?.coordinates && (
-                                        <div className="mt-2 text-xs text-gray-500 flex items-center gap-2">
-                                            <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none">
-                                                <path d="M12 11.5a2 2 0 100-4 2 2 0 000 4z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                                                <path d="M21 10c0 6-9 13-9 13S3 16 3 10a9 9 0 1118 0z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                                            </svg>
-                                            <span>Coords: {s.location.coordinates[1]?.toFixed(5)}, {s.location.coordinates[0]?.toFixed(5)}</span>
-                                            <a
-                                                className="ml-2 text-xs text-blue-600 hover:underline"
-                                                href={`https://www.google.com/maps/search/?api=1&query=${s.location.coordinates[1]},${s.location.coordinates[0]}`}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                            >
-                                                View
-                                            </a>
-                                        </div>
-                                    )}
-
-                                    <div className="mt-3 flex gap-2">
-                                        <button
-                                            onClick={() => handleClearSOS(s._id)}
-                                            className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition"
-                                        >
-                                            Mark Resolved
-                                        </button>
-                                        <button
-                                            onClick={() => navigator.clipboard?.writeText(JSON.stringify(s))}
-                                            className="px-3 py-1 bg-gray-100 text-gray-800 rounded text-sm hover:bg-gray-200 transition"
-                                        >
-                                            Copy
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* Volunteers preview */}
-            <div className="p-6 bg-white border rounded-lg shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold">Volunteers (preview)</h3>
-                    <div className="text-sm text-gray-400">{vLoading ? 'Loading…' : `${Math.min((volunteers || []).length, 9)} shown`}</div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {(volunteers || []).slice(0, 9).map(v => (
-                        <div key={v._id} className="p-4 flex items-start gap-3 border rounded hover:shadow-sm transition">
-                            <div className="flex-none">
-                                <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center font-semibold">
-                                    {(v.name || '').split(' ').map(n => n[0]).slice(0,2).join('')}
-                                </div>
-                            </div>
-                            <div className="flex-1">
-                                <div className="font-medium">{v.name}</div>
-                                <div className="text-sm text-gray-600">{v.city} • {v.phone}</div>
-                                <div className="text-xs mt-2 text-gray-500">Skills: {(v.skills || []).slice(0,4).join(', ') || '—'}</div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+          <p className="text-gray-600">Manage Smart Inclusion platform data and monitor activities</p>
         </div>
-    )
+
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="card text-center">
+            <div className="text-2xl font-bold text-primary-600 mb-2">{stats.places}</div>
+            <div className="text-gray-600">Accessible Places</div>
+          </div>
+          <div className="card text-center">
+            <div className="text-2xl font-bold text-red-600 mb-2">{stats.sos}</div>
+            <div className="text-gray-600">SOS Requests</div>
+          </div>
+          <div className="card text-center">
+            <div className="text-2xl font-bold text-green-600 mb-2">{stats.schemes}</div>
+            <div className="text-gray-600">Schemes</div>
+          </div>
+          <div className="card text-center">
+            <div className="text-2xl font-bold text-blue-600 mb-2">{stats.volunteers}</div>
+            <div className="text-gray-600">Volunteers</div>
+          </div>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="card mb-8">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8">
+              {['overview', 'places', 'sos', 'schemes', 'volunteers'].map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm capitalize ${
+                    activeTab === tab
+                      ? 'border-primary-500 text-primary-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        <div className="card">
+          {activeTab === 'overview' && (
+            <div className="space-y-6">
+              {/* Recent SOS Alerts */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Recent SOS Alerts</h3>
+                {sosRequests.length > 0 ? (
+                  <div className="space-y-3">
+                    {sosRequests.map(sos => (
+                      <div key={sos._id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                        <div>
+                          <div className="font-medium">
+                            SOS Alert - {new Date(sos.createdAt).toLocaleString()}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            Location: {sos.location.coordinates[1].toFixed(4)}, {sos.location.coordinates[0].toFixed(4)}
+                          </div>
+                          {sos.message && (
+                            <div className="text-sm text-gray-600">Message: {sos.message}</div>
+                          )}
+                        </div>
+                        <select
+                          value={sos.status}
+                          onChange={(e) => handleUpdateSosStatus(sos._id, e.target.value)}
+                          className="text-sm border border-gray-300 rounded px-2 py-1"
+                        >
+                          <option value="open">Open</option>
+                          <option value="acknowledged">Acknowledged</option>
+                          <option value="closed">Closed</option>
+                        </select>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-4">No SOS alerts</p>
+                )}
+              </div>
+
+              {/* Recent Places */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Recent Places</h3>
+                {places.length > 0 ? (
+                  <div className="space-y-3">
+                    {places.map(place => (
+                      <div key={place._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                          <div className="font-medium">{place.name}</div>
+                          <div className="text-sm text-gray-600">{place.address}</div>
+                          <div className="flex gap-1 mt-1">
+                            {place.tags?.map((tag, index) => (
+                              <span key={index} className="inline-block bg-primary-100 text-primary-800 text-xs px-2 py-1 rounded">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleDeletePlace(place._id)}
+                          className="text-red-600 hover:text-red-800 text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-4">No places added yet</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'places' && (
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Manage Places</h3>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead>
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Address
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Tags
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {places.map(place => (
+                      <tr key={place._id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="font-medium text-gray-900">{place.name}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {place.address}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex flex-wrap gap-1">
+                            {place.tags?.slice(0, 3).map((tag, index) => (
+                              <span key={index} className="inline-block bg-primary-100 text-primary-800 text-xs px-2 py-1 rounded">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button
+                            onClick={() => handleDeletePlace(place._id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'sos' && (
+            <div>
+              <h3 className="text-lg font-semibold mb-4">SOS Requests</h3>
+              <div className="space-y-4">
+                {sosRequests.map(sos => (
+                  <div key={sos._id} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <div className="font-semibold">
+                          SOS Alert - {new Date(sos.createdAt).toLocaleString()}
+                        </div>
+                        <div className="text-sm text-gray-600 mt-1">
+                          Location: {sos.location.coordinates[1].toFixed(6)}, {sos.location.coordinates[0].toFixed(6)}
+                        </div>
+                      </div>
+                      <select
+                        value={sos.status}
+                        onChange={(e) => handleUpdateSosStatus(sos._id, e.target.value)}
+                        className="text-sm border border-gray-300 rounded px-2 py-1"
+                      >
+                        <option value="open">Open</option>
+                        <option value="acknowledged">Acknowledged</option>
+                        <option value="closed">Closed</option>
+                      </select>
+                    </div>
+                    {sos.message && (
+                      <div className="mb-3">
+                        <div className="text-sm font-medium text-gray-700">Message:</div>
+                        <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">{sos.message}</div>
+                      </div>
+                    )}
+                    <div className="text-xs text-gray-500">
+                      ID: {sos._id}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
 }
+
+export default AdminDashboard
