@@ -1,25 +1,22 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { motion } from "framer-motion";
+import styles from "../styles/UserLogin.module.css";
 
 const UserLogin = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
-  const { userLogin } = useAuth(); // FIXED: Changed from 'login' to 'userLogin'
+  const { userLogin } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      const result = await userLogin(formData.email, formData.password); // FIXED: Changed from 'login' to 'userLogin'
-
+      const result = await userLogin(formData.email, formData.password);
       if (result.success) {
-        navigate("/"); // Redirect after successful login
+        navigate("/");
       } else {
         alert(result.error || "Invalid email or password");
       }
@@ -32,81 +29,79 @@ const UserLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      {/* Header */}
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-xl">SI</span>
-          </div>
+    <div className={styles.container}>
+      <motion.div
+        className={styles.cardContainer}
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        {/* Logo */}
+        <div className={styles.logoWrapper}>
+          <div className={styles.logo}>SI</div>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-          Login to Your Account
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+
+        {/* Header */}
+        <h2 className={styles.title}>Login to Your Account</h2>
+        <p className={styles.subtitle}>
           Welcome back! Please enter your credentials.
         </p>
-      </div>
 
-      {/* Form */}
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Email Address
-              </label>
-              <input
-                type="email"
-                placeholder="you@example.com"
-                required
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-              />
-            </div>
+        {/* Form */}
+        <motion.form
+          className={styles.form}
+          onSubmit={handleSubmit}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className={styles.inputGroup}>
+            <label>Email Address</label>
+            <input
+              type="email"
+              placeholder="you@example.com"
+              required
+              className={styles.inputField}
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                required
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-              />
-            </div>
+          <div className={styles.inputGroup}>
+            <label>Password</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              required
+              className={styles.inputField}
+              value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+            />
+          </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-            >
-              {loading ? "Logging in..." : "Login"}
-            </button>
-          </form>
-        </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className={styles.btnPrimary}
+          >
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </motion.form>
 
         {/* Footer */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
+        <div className={styles.footer}>
+          <p>
             Don't have an account?{" "}
-            <Link
-              to="/user/register"
-              className="text-blue-600 hover:text-blue-500 font-medium"
-            >
+            <Link to="/user/register" className={styles.registerLink}>
               Register here
             </Link>
           </p>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

@@ -3,7 +3,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+  background: linear-gradient(135deg, #f5f7fa, #dbeafe);
   padding: 2rem;
 }
 
@@ -25,7 +25,7 @@
 .logo {
   width: 70px;
   height: 70px;
-  background-color: #4f46e5;
+  background-color: #3b82f6;
   color: white;
   font-weight: bold;
   font-size: 1.75rem;
@@ -82,14 +82,14 @@
 }
 
 .inputField:focus {
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 .btnPrimary {
   width: 100%;
   padding: 0.85rem 1rem;
-  background-color: #4f46e5;
+  background-color: #3b82f6;
   color: white;
   font-weight: bold;
   border: none;
@@ -99,7 +99,7 @@
 }
 
 .btnPrimary:hover {
-  background-color: #4338ca;
+  background-color: #2563eb;
 }
 
 .btnPrimary:disabled {
@@ -107,17 +107,38 @@
   cursor: not-allowed;
 }
 
-.backLink {
+.footer {
   margin-top: 1.5rem;
 }
 
-.backLink a {
-  color: #4f46e5;
+.registerLink {
+  color: #3b82f6;
   font-weight: 500;
   text-decoration: none;
   transition: all 0.3s;
 }
 
-.backLink a:hover {
-  color: #4338ca;
+.registerLink:hover {
+  color: #2563eb;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .cardContainer {
+    padding: 2rem 1.5rem;
+  }
+
+  .logo {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+
+  .title {
+    font-size: 1.75rem;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+  }
 }

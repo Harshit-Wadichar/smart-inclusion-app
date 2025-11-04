@@ -12,7 +12,7 @@ const Navbar = () => {
     { path: "/map", label: "Accessibility Map" },
     { path: "/sos", label: "Emergency SOS" },
     { path: "/schemes", label: "Schemes & Events" },
-    { path: "/volunteers", label: "Admins" },
+    { path: "/volunteers", label: "NGOs" },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -61,7 +61,7 @@ const Navbar = () => {
               <Link to="/admin/login" className="btn-primary">
                 Admin Login
               </Link>
-              <Link to="/user/login" className="btn-secondary">
+              <Link to="/user/login" className="btn-secondary" style={{textDecoration: "none"}}>
                 User Login
               </Link>
             </div>

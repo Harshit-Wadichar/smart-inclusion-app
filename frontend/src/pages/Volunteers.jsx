@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { volunteersAPI } from '../services/api'
+import { authAPI, volunteersAPI } from '../services/api'
 import styles from '../styles/Volunteers.module.css'
 
 const Volunteers = () => {
@@ -16,12 +16,12 @@ const Volunteers = () => {
   })
 
   useEffect(() => {
-    loadVolunteers()
+    loadAdmins()
   }, [])
 
-  const loadVolunteers = async () => {
+  const loadAdmins = async () => {
     try {
-      const response = await volunteersAPI.getAll()
+      const response = await authAPI.getAll()
       setVolunteers(response.data)
     } catch (error) {
       console.error('Error loading volunteers:', error)
@@ -62,9 +62,9 @@ const Volunteers = () => {
       <div className={styles.container}>
         <div className={styles.topBar}>
           <div>
-            <h1 className={styles.title}>Admin Network</h1>
+            <h1 className={styles.title}>NGO Network</h1>
             <p className={styles.subtitle}>
-              Connect with dedicated volunteers and NGOs committed to supporting Persons with Disabilities.
+              Connect with dedicated NGOs committed to supporting Persons with Disabilities.
             </p>
           </div>
         </div>
@@ -101,22 +101,9 @@ const Volunteers = () => {
                   {volunteer.phone && <div style={{ marginTop: 4 }}>{volunteer.phone}</div>}
                 </div>
 
-                {skillsArray.length > 0 && (
-                  <div className={styles.skillsRow}>
-                    {skillsArray.slice(0, 3).map((skill, idx) => (
-                      <span key={idx} className={styles.skillTag}>{skill}</span>
-                    ))}
-                    {skillsArray.length > 3 && (
-                      <span className={styles.skillTag}>+{skillsArray.length - 3}</span>
-                    )}
-                  </div>
-                )}
+                
 
-                <div style={{ marginTop: 8 }}>
-                  <div className={`${styles.badge} ${volunteer.verified ? styles.badgeVerified : styles.badgePending}`}>
-                    {volunteer.verified ? 'Verified' : 'Pending Verification'}
-                  </div>
-                </div>
+               
               </div>
             )
           })}
@@ -125,9 +112,9 @@ const Volunteers = () => {
         {volunteers.length === 0 && (
           <div className={styles.emptyState}>
             <div style={{ fontSize: 48, marginBottom: 12 }}>🤝</div>
-            <h3 style={{ fontSize: 18, marginBottom: 6 }}>No volunteers yet</h3>
+            <h3 style={{ fontSize: 18, marginBottom: 6 }}>Not Connected yet</h3>
             <p style={{ color: '#6b7280', marginBottom: 12 }}>
-              Be the first to join our volunteer network!
+              Be the first to join our network!
             </p>
             <button onClick={() => setShowRegisterForm(true)} className={styles.btnPrimary}>
               Register as Volunteer

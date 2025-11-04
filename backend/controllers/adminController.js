@@ -30,3 +30,12 @@ exports.login = async (req, res, next) => {
     res.json({ token });
   } catch (err) { next(err); }
 };
+
+exports.getAll = async (req, res, next) => {
+  try {
+    const admin = await Admin.find({}).limit(500);
+    res.json(admin);
+  } catch (err) {
+    next(err);
+  }
+};

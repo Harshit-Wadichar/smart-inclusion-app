@@ -87,11 +87,12 @@ const Home = () => {
   position: "relative"
       }}>
         <div className="container text-center">
+          <div className="hero-overlay"></div>
           <motion.h1
             initial={{ opacity: 0, y: -40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="hero-title" style={{color: "#6366f1"}}
+            className="hero-title"
           >
             Empowering Inclusion Through Technology
           </motion.h1>

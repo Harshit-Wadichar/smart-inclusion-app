@@ -18,6 +18,15 @@ const AdminDashboard = () => {
   })
   const [places, setPlaces] = useState([])
   const [sosRequests, setSosRequests] = useState([])
+  const [schemes, setSchemes] = useState([])
+  const [volunteers, setVolunteers] = useState([])
+  const [newScheme, setNewScheme] = useState({
+    name: '',
+    description: '',
+    eligibility: '',
+    benefits: '',
+    contact: ''
+  })
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -45,6 +54,8 @@ const AdminDashboard = () => {
 
       setPlaces(placesRes.data.slice(0, 10))
       setSosRequests(sosRes.data.slice(0, 10))
+      setSchemes(schemesRes.data)
+      setVolunteers(volunteersRes.data)
     } catch (error) {
       console.error('Error loading dashboard data:', error)
     }
@@ -71,6 +82,38 @@ const AdminDashboard = () => {
     } catch (error) {
       alert('Error updating SOS status: ' + error.response?.data?.msg)
     }
+  }
+
+  const handleDeleteScheme = async (id) => {
+    if (window.confirm('Are you sure you want to delete this scheme?')) {
+      try {
+        await schemesAPI.delete(id)
+        setSchemes(schemes.filter(s => s._id !== id))
+        setStats(prev => ({ ...prev, schemes: prev.schemes - 1 }))
+      } catch (error) {
+        alert('Error deleting scheme: ' + error.response?.data?.msg)
+      }
+    }
+  }
+
+  const handleDeleteVolunteer = async (id) => {
+    if (window.confirm('Are you sure you want to delete this volunteer?')) {
+      try {
+        await volunteersAPI.delete(id)
+        setVolunteers(volunteers.filter(v => v._id !== id))
+        setStats(prev => ({ ...prev, volunteers: prev.volunteers - 1 }))
+      } catch (error) {
+        alert('Error deleting volunteer: ' + error.response?.data?.msg)
+      }
+    }
+  }
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setNewScheme(prev => ({
+      ...prev,
+      [name]: value
+    }))
   }
 
   if (!isAuthenticated) {
@@ -118,7 +161,7 @@ const AdminDashboard = () => {
                 className={`${styles.tabBtn} ${activeTab === tab ? styles.tabBtnActive : ''}`}
                 type="button"
               >
-                {tab}
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
             ))}
           </div>
@@ -282,7 +325,102 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* you can add schemes and volunteers tabs similarly using styles.card */}
+          {activeTab === 'schemes' && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <h3 style={{ fontSize: 18, fontWeight: 700 }}>Government Schemes</h3>
+              </div>
+
+              <div className={styles.tableWrap}>
+                <table className={styles.table}>
+                  <thead className={styles.thead}>
+                    <tr>
+                      <th>Name</th>
+                      <th>Description</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className={styles.tbody}>
+                    {schemes.map(scheme => (
+                      <tr key={scheme._id}>
+                        <td style={{ fontWeight: 600 }}>{scheme.title}</td>
+                        <td className={styles.statLabel}>{scheme.description}</td>
+                        <td>
+                          <button 
+                            onClick={() => handleDeleteScheme(scheme._id)} 
+                            className={styles.actionBtn} 
+                            type="button"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {schemes.length === 0 && (
+                  <p className={styles.statLabel} style={{ textAlign: 'center', padding: 20 }}>
+                    No schemes added yet
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'volunteers' && (
+            <div>
+              <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>Registered Volunteers</h3>
+              <div className={styles.tableWrap}>
+                <table className={styles.table}>
+                  <thead className={styles.thead}>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Skills</th>
+                      <th>Availability</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className={styles.tbody}>
+                    {volunteers.map(volunteer => (
+                      <tr key={volunteer._id}>
+                        <td style={{ fontWeight: 600 }}>{volunteer.name}</td>
+                        <td>{volunteer.email}</td>
+                        <td>{volunteer.phone}</td>
+                        <td>
+                          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                            {volunteer.skills?.map((skill, index) => (
+                              <span key={index} className={styles.tag}>{skill}</span>
+                            ))}
+                          </div>
+                        </td>
+                        <td>
+                          <span className={styles.tag}>
+                            {volunteer.availability || 'Flexible'}
+                          </span>
+                        </td>
+                        <td>
+                          <button 
+                            onClick={() => handleDeleteVolunteer(volunteer._id)} 
+                            className={styles.actionBtn} 
+                            type="button"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {volunteers.length === 0 && (
+                  <p className={styles.statLabel} style={{ textAlign: 'center', padding: 20 }}>
+                    No volunteers registered yet
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

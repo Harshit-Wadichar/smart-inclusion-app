@@ -62,7 +62,8 @@ export const volunteersAPI = {
 
 export const authAPI = {
   login: (email, password) => api.post('/admin/login', { email, password }),
-  register: (data) => api.post('/admin/register', data)
+  register: (data) => api.post('/admin/register', data),
+  getAll: () => api.get('/admin/getAll')
 }
 
 // User (Volunteer) auth - FIXED: Use individual parameters

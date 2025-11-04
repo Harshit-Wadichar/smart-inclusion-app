@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { motion } from "framer-motion";
+import styles from "../styles/UserRegister.module.css";
 
 const UserRegister = () => {
   const [formData, setFormData] = useState({
@@ -25,18 +27,15 @@ const UserRegister = () => {
       return;
     }
 
-    // Try to get browser location (optional)
-    const getLocation = () => new Promise((resolve) => {
-      if (!navigator.geolocation) return resolve(null);
-      navigator.geolocation.getCurrentPosition(
-        (pos) => resolve({ 
-          lat: pos.coords.latitude, 
-          lng: pos.coords.longitude 
-        }),
-        () => resolve(null),
-        { enableHighAccuracy: true, timeout: 8000 }
-      );
-    });
+    const getLocation = () =>
+      new Promise((resolve) => {
+        if (!navigator.geolocation) return resolve(null);
+        navigator.geolocation.getCurrentPosition(
+          (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+          () => resolve(null),
+          { enableHighAccuracy: true, timeout: 8000 }
+        );
+      });
 
     try {
       const position = await getLocation();
@@ -60,107 +59,92 @@ const UserRegister = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-xl">SI</span>
+    <div className={styles.container}>
+      <motion.div
+        className={styles.cardContainer}
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        {/* Logo */}
+        <div className={styles.logoWrapper}>
+          <div className={styles.logo}>SI</div>
+        </div>
+
+        {/* Header */}
+        <h2 className={styles.title}>Create Account</h2>
+
+        {/* Form */}
+        <motion.form
+          className={styles.form}
+          onSubmit={handleSubmit}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          {/* Name */}
+          <div className={styles.inputGroup}>
+            <label>Name</label>
+            <input
+              type="text"
+              required
+              className={styles.inputField}
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            />
           </div>
-        </div>
-        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-          Create a Volunteer Account
-        </h2>
-      </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {/* Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Name
-              </label>
-              <input
-                type="text"
-                required
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-              />
-            </div>
+          {/* Email */}
+          <div className={styles.inputGroup}>
+            <label>Email</label>
+            <input
+              type="email"
+              required
+              className={styles.inputField}
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            />
+          </div>
 
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <input
-                type="email"
-                required
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-              />
-            </div>
+          {/* Phone */}
+          <div className={styles.inputGroup}>
+            <label>Phone</label>
+            <input
+              type="text"
+              className={styles.inputField}
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            />
+          </div>
 
-            {/* Phone */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Phone
-              </label>
-              <input
-                type="text"
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-              />
-            </div>
+          {/* Password */}
+          <div className={styles.inputGroup}>
+            <label>Password</label>
+            <input
+              type="password"
+              required
+              className={styles.inputField}
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            />
+          </div>
 
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <input
-                type="password"
-                required
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-              />
-            </div>
+          {/* Submit button */}
+          <button type="submit" disabled={loading} className={styles.btnPrimary}>
+            {loading ? "Registering..." : "Register"}
+          </button>
+        </motion.form>
 
-            {/* Submit button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-            >
-              {loading ? "Registering..." : "Register as Volunteer"}
-            </button>
-          </form>
-        </div>
-
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
+        {/* Footer */}
+        <div className={styles.footer}>
+          <p>
             Already have an account?{" "}
-            <Link
-              to="/user/login"
-              className="text-blue-600 hover:text-blue-500 font-medium"
-            >
+            <Link to="/user/login" className={styles.registerLink}>
               Login here
             </Link>
           </p>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
