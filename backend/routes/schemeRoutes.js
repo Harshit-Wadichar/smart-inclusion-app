@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const schemeController = require('../controllers/schemeController');
-const auth = require('../middleware/authMiddleware');
+const {auth} = require('../middleware/authMiddleware');
 
 router.get('/', schemeController.getAll);
 router.post('/', auth, schemeController.createScheme); // admin creates schemes

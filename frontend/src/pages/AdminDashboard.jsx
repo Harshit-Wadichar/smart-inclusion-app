@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useSocket } from '../contexts/SocketContext'
 import { placesAPI, sosAPI, schemesAPI, volunteersAPI } from '../services/api'
+import styles from '../styles/AdminDashboard.module.css'
 
 const AdminDashboard = () => {
   const { isAuthenticated, user } = useAuth()
@@ -64,7 +65,7 @@ const AdminDashboard = () => {
   const handleUpdateSosStatus = async (id, status) => {
     try {
       await sosAPI.updateStatus(id, status)
-      setSosRequests(prev => 
+      setSosRequests(prev =>
         prev.map(sos => sos._id === id ? { ...sos, status } : sos)
       )
     } catch (error) {
@@ -77,114 +78,116 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600">Manage Smart Inclusion platform data and monitor activities</p>
-        </div>
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <header className={styles.header}>
+          <h1 className={styles.headerH1}>Admin Dashboard</h1>
+          <p className={styles.headerP}>Manage Smart Inclusion platform data and monitor activities</p>
+        </header>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="card text-center">
-            <div className="text-2xl font-bold text-primary-600 mb-2">{stats.places}</div>
-            <div className="text-gray-600">Accessible Places</div>
+        <div className={styles.statsGrid}>
+          <div className={styles.statCard}>
+            <div className={styles.statValue} style={{ color: '#0ea5e9' }}>{stats.places}</div>
+            <div className={styles.statLabel}>Accessible Places</div>
           </div>
-          <div className="card text-center">
-            <div className="text-2xl font-bold text-red-600 mb-2">{stats.sos}</div>
-            <div className="text-gray-600">SOS Requests</div>
+
+          <div className={styles.statCard}>
+            <div className={styles.statValue} style={{ color: '#ef4444' }}>{stats.sos}</div>
+            <div className={styles.statLabel}>SOS Requests</div>
           </div>
-          <div className="card text-center">
-            <div className="text-2xl font-bold text-green-600 mb-2">{stats.schemes}</div>
-            <div className="text-gray-600">Schemes</div>
+
+          <div className={styles.statCard}>
+            <div className={styles.statValue} style={{ color: '#16a34a' }}>{stats.schemes}</div>
+            <div className={styles.statLabel}>Schemes</div>
           </div>
-          <div className="card text-center">
-            <div className="text-2xl font-bold text-blue-600 mb-2">{stats.volunteers}</div>
-            <div className="text-gray-600">Volunteers</div>
+
+          <div className={styles.statCard}>
+            <div className={styles.statValue} style={{ color: '#3b82f6' }}>{stats.volunteers}</div>
+            <div className={styles.statLabel}>Volunteers</div>
           </div>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="card mb-8">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
-              {['overview', 'places', 'sos', 'schemes', 'volunteers'].map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm capitalize ${
-                    activeTab === tab
-                      ? 'border-primary-500 text-primary-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </nav>
+        <div className={styles.tabsCard}>
+          <div className={styles.tabNav}>
+            {['overview', 'places', 'sos', 'schemes', 'volunteers'].map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`${styles.tabBtn} ${activeTab === tab ? styles.tabBtnActive : ''}`}
+                type="button"
+              >
+                {tab}
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Tab Content */}
-        <div className="card">
+        <div className={styles.card}>
           {activeTab === 'overview' && (
-            <div className="space-y-6">
+            <div className={styles.spaceY6}>
               {/* Recent SOS Alerts */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Recent SOS Alerts</h3>
+                <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Recent SOS Alerts</h3>
                 {sosRequests.length > 0 ? (
-                  <div className="space-y-3">
+                  <div>
                     {sosRequests.map(sos => (
-                      <div key={sos._id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-                        <div>
-                          <div className="font-medium">
+                      <div key={sos._id} className={styles.listItem}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 700 }}>
                             SOS Alert - {new Date(sos.createdAt).toLocaleString()}
                           </div>
-                          <div className="text-sm text-gray-600">
+                          <div style={{ color: '#6b7280', marginTop: 6 }}>
                             Location: {sos.location.coordinates[1].toFixed(4)}, {sos.location.coordinates[0].toFixed(4)}
                           </div>
                           {sos.message && (
-                            <div className="text-sm text-gray-600">Message: {sos.message}</div>
+                            <div className={styles.sosMessage} style={{ marginTop: 6 }}>
+                              Message: {sos.message}
+                            </div>
                           )}
                         </div>
-                        <select
-                          value={sos.status}
-                          onChange={(e) => handleUpdateSosStatus(sos._id, e.target.value)}
-                          className="text-sm border border-gray-300 rounded px-2 py-1"
-                        >
-                          <option value="open">Open</option>
-                          <option value="acknowledged">Acknowledged</option>
-                          <option value="closed">Closed</option>
-                        </select>
+
+                        <div style={{ marginLeft: 12 }}>
+                          <select
+                            value={sos.status}
+                            onChange={(e) => handleUpdateSosStatus(sos._id, e.target.value)}
+                            className={styles.smallSelect}
+                          >
+                            <option value="open">Open</option>
+                            <option value="acknowledged">Acknowledged</option>
+                            <option value="closed">Closed</option>
+                          </select>
+                        </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-center py-4">No SOS alerts</p>
+                  <p className={styles.statLabel} style={{ textAlign: 'center', padding: 12 }}>No SOS alerts</p>
                 )}
               </div>
 
               {/* Recent Places */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Recent Places</h3>
+                <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Recent Places</h3>
                 {places.length > 0 ? (
-                  <div className="space-y-3">
+                  <div>
                     {places.map(place => (
-                      <div key={place._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div key={place._id} className={styles.placeCard}>
                         <div>
-                          <div className="font-medium">{place.name}</div>
-                          <div className="text-sm text-gray-600">{place.address}</div>
-                          <div className="flex gap-1 mt-1">
+                          <div style={{ fontWeight: 700 }}>{place.name}</div>
+                          <div style={{ color: '#6b7280', fontSize: 13 }}>{place.address}</div>
+                          <div className={styles.tags} style={{ marginTop: 8 }}>
                             {place.tags?.map((tag, index) => (
-                              <span key={index} className="inline-block bg-primary-100 text-primary-800 text-xs px-2 py-1 rounded">
-                                {tag}
-                              </span>
+                              <span key={index} className={styles.tag}>{tag}</span>
                             ))}
                           </div>
                         </div>
                         <button
                           onClick={() => handleDeletePlace(place._id)}
-                          className="text-red-600 hover:text-red-800 text-sm"
+                          className={styles.actionBtn}
+                          type="button"
                         >
                           Delete
                         </button>
@@ -192,7 +195,7 @@ const AdminDashboard = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-center py-4">No places added yet</p>
+                  <p className={styles.statLabel} style={{ textAlign: 'center', padding: 12 }}>No places added yet</p>
                 )}
               </div>
             </div>
@@ -200,48 +203,31 @@ const AdminDashboard = () => {
 
           {activeTab === 'places' && (
             <div>
-              <h3 className="text-lg font-semibold mb-4">Manage Places</h3>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead>
+              <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>Manage Places</h3>
+              <div className={styles.tableWrap}>
+                <table className={styles.table}>
+                  <thead className={styles.thead}>
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Name
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Address
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Tags
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
+                      <th>Name</th>
+                      <th>Address</th>
+                      <th>Tags</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className={styles.tbody}>
                     {places.map(place => (
                       <tr key={place._id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="font-medium text-gray-900">{place.name}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {place.address}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex flex-wrap gap-1">
+                        <td>{place.name}</td>
+                        <td className={styles.statLabel}>{place.address}</td>
+                        <td>
+                          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                             {place.tags?.slice(0, 3).map((tag, index) => (
-                              <span key={index} className="inline-block bg-primary-100 text-primary-800 text-xs px-2 py-1 rounded">
-                                {tag}
-                              </span>
+                              <span key={index} className={styles.tag}>{tag}</span>
                             ))}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button
-                            onClick={() => handleDeletePlace(place._id)}
-                            className="text-red-600 hover:text-red-900"
-                          >
+                        <td>
+                          <button onClick={() => handleDeletePlace(place._id)} className={styles.actionBtn} type="button">
                             Delete
                           </button>
                         </td>
@@ -255,43 +241,48 @@ const AdminDashboard = () => {
 
           {activeTab === 'sos' && (
             <div>
-              <h3 className="text-lg font-semibold mb-4">SOS Requests</h3>
-              <div className="space-y-4">
+              <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>SOS Requests</h3>
+              <div>
                 {sosRequests.map(sos => (
-                  <div key={sos._id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-3">
+                  <div key={sos._id} className={styles.card} style={{ marginBottom: 12 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
                       <div>
-                        <div className="font-semibold">
+                        <div style={{ fontWeight: 700 }}>
                           SOS Alert - {new Date(sos.createdAt).toLocaleString()}
                         </div>
-                        <div className="text-sm text-gray-600 mt-1">
+                        <div style={{ color: '#6b7280', marginTop: 6 }}>
                           Location: {sos.location.coordinates[1].toFixed(6)}, {sos.location.coordinates[0].toFixed(6)}
                         </div>
                       </div>
-                      <select
-                        value={sos.status}
-                        onChange={(e) => handleUpdateSosStatus(sos._id, e.target.value)}
-                        className="text-sm border border-gray-300 rounded px-2 py-1"
-                      >
-                        <option value="open">Open</option>
-                        <option value="acknowledged">Acknowledged</option>
-                        <option value="closed">Closed</option>
-                      </select>
+
+                      <div>
+                        <select
+                          value={sos.status}
+                          onChange={(e) => handleUpdateSosStatus(sos._id, e.target.value)}
+                          className={styles.smallSelect}
+                        >
+                          <option value="open">Open</option>
+                          <option value="acknowledged">Acknowledged</option>
+                          <option value="closed">Closed</option>
+                        </select>
+                      </div>
                     </div>
+
                     {sos.message && (
-                      <div className="mb-3">
-                        <div className="text-sm font-medium text-gray-700">Message:</div>
-                        <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">{sos.message}</div>
+                      <div style={{ marginTop: 10 }} className={styles.sosMessage}>
+                        <div style={{ fontWeight: 600, marginBottom: 6 }}>Message:</div>
+                        <div style={{ color: '#374151' }}>{sos.message}</div>
                       </div>
                     )}
-                    <div className="text-xs text-gray-500">
-                      ID: {sos._id}
-                    </div>
+
+                    <div style={{ marginTop: 8, color: '#9ca3af', fontSize: 12 }}>ID: {sos._id}</div>
                   </div>
                 ))}
               </div>
             </div>
           )}
+
+          {/* you can add schemes and volunteers tabs similarly using styles.card */}
         </div>
       </div>
     </div>

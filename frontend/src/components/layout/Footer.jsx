@@ -10,7 +10,7 @@ const Footer = () => {
           <div className="footer-logo-section">
             <div className="footer-logo">
               <div className="logo-icon"></div>
-              <span className="logo-text">Smart Inclusion</span>
+              <span className="logo-text" style={{color: "white"}}>Smart Inclusion</span>
             </div>
             <p className="footer-description">
               Empowering Persons with Disabilities through accessible technology, 

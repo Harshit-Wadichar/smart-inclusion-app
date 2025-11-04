@@ -1,24 +1,27 @@
-import React, { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { useAuth } from '../../contexts/AuthContext'
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false)
-  const { isAuthenticated, logout } = useAuth()
-  const location = useLocation()
+  const [isOpen, setIsOpen] = useState(false);
+  const { isAuthenticated, logout, user } = useAuth(); // Added user to get role
+  const location = useLocation();
 
   const navItems = [
-    { path: '/', label: 'Home' },
-    { path: '/map', label: 'Accessibility Map' },
-    { path: '/sos', label: 'Emergency SOS' },
-    { path: '/schemes', label: 'Schemes & Events' },
-    { path: '/volunteers', label: 'Volunteers' },
-  ]
+    { path: "/", label: "Home" },
+    { path: "/map", label: "Accessibility Map" },
+    { path: "/sos", label: "Emergency SOS" },
+    { path: "/schemes", label: "Schemes & Events" },
+    { path: "/volunteers", label: "Admins" },
+  ];
 
-  const isActive = (path) => location.pathname === path
+  const isActive = (path) => location.pathname === path;
+
+  // Check if user is admin
+  const isAdmin = user?.role === "admin";
 
   return (
-     <nav className="navbar">
+    <nav className="navbar">
       <div className="navbar-container">
         {/* Logo */}
         <div className="navbar-logo">
@@ -34,7 +37,7 @@ const Navbar = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`nav-item ${isActive(item.path) ? 'active' : ''}`}
+              className={`nav-item ${isActive(item.path) ? "active" : ""}`}
             >
               {item.label}
             </Link>
@@ -42,23 +45,47 @@ const Navbar = () => {
 
           {isAuthenticated ? (
             <div className="auth-buttons">
-              <Link to="/admin/dashboard" className="nav-item">Dashboard</Link>
-              <button onClick={logout} className="btn-secondary">Logout</button>
+              {/* Only show Dashboard for admin users */}
+              {isAdmin && (
+                <Link to="/admin/dashboard" className="nav-item">
+                  Dashboard
+                </Link>
+              )}
+              
+              <button onClick={logout} className="btn-secondary">
+                Logout
+              </button>
             </div>
           ) : (
-            <Link to="/admin/login" className="btn-primary">Admin Login</Link>
+            <div className="auth-buttons">
+              <Link to="/admin/login" className="btn-primary">
+                Admin Login
+              </Link>
+              <Link to="/user/login" className="btn-secondary">
+                User Login
+              </Link>
+            </div>
           )}
         </div>
 
         {/* Mobile Menu Button */}
         <div className="mobile-menu-button">
           <button onClick={() => setIsOpen(!isOpen)}>
-            <svg className="menu-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg
+              className="menu-icon"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d={isOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+                d={
+                  isOpen
+                    ? "M6 18L18 6M6 6l12 12"
+                    : "M4 6h16M4 12h16M4 18h16"
+                }
               />
             </svg>
           </button>
@@ -72,41 +99,60 @@ const Navbar = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`mobile-nav-item ${isActive(item.path) ? 'active' : ''}`}
+              className={`mobile-nav-item ${
+                isActive(item.path) ? "active" : ""
+              }`}
               onClick={() => setIsOpen(false)}
             >
               {item.label}
             </Link>
           ))}
+
           {isAuthenticated ? (
             <>
-              <Link
-                to="/admin/dashboard"
-                className="mobile-nav-item"
-                onClick={() => setIsOpen(false)}
-              >
-                Dashboard
-              </Link>
+              {/* Only show Dashboard for admin users in mobile */}
+              {isAdmin && (
+                <Link
+                  to="/admin/dashboard"
+                  className="mobile-nav-item"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Dashboard
+                </Link>
+              )}
+              
               <button
-                onClick={() => { logout(); setIsOpen(false); }}
+                onClick={() => {
+                  logout();
+                  setIsOpen(false);
+                }}
                 className="mobile-nav-item"
               >
                 Logout
               </button>
             </>
           ) : (
-            <Link
-              to="/admin/login"
-              className="mobile-nav-item"
-              onClick={() => setIsOpen(false)}
-            >
-              Admin Login
-            </Link>
+            <>
+              <Link
+                to="/admin/login"
+                className="mobile-nav-item"
+                onClick={() => setIsOpen(false)}
+              >
+                Admin Login
+              </Link>
+              <Link
+                to="/user/login"
+                className="mobile-nav-item"
+                onClick={() => setIsOpen(false)}
+              >
+                User Login
+              </Link>
+            </>
           )}
         </div>
       )}
     </nav>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;

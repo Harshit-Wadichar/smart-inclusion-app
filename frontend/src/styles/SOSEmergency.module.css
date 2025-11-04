@@ -1,0 +1,222 @@
+/* page layout */
+.page {
+  min-height: 100vh;
+  background-color: #fff7f7; /* soft red-50 */
+  padding: 32px 16px;
+  box-sizing: border-box;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color: #1f2937; /* gray-800 */
+}
+
+/* container */
+.container {
+  max-width: 1024px;
+  margin: 0 auto;
+}
+
+/* header */
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #991b1b; /* red-800 */
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: #9a3412; /* red-700 */
+  font-size: 1.05rem;
+}
+
+/* grid layout */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: 2fr 1fr; /* main + sidebar */
+  }
+}
+
+/* card */
+.card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+/* central SOS area (big card) */
+.sosCard {
+  text-align: center;
+}
+
+/* big red button/avatar */
+.sosAvatar {
+  width: 128px;
+  height: 128px;
+  background-color: #dc2626; /* red-600 */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px auto;
+  box-shadow: 0 10px 30px rgba(220, 38, 38, 0.15);
+  animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.04); opacity: 0.9; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.sosAvatarText {
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.4rem;
+}
+
+/* headings inside card */
+.cardH2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #111827;
+}
+
+.cardP {
+  color: #4b5563;
+}
+
+/* textarea / input */
+.inputField {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 0.95rem;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+/* location info */
+.locationInfo {
+  color: #374151;
+  background: #f8fafc; /* subtle */
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  margin-top: 8px;
+}
+
+/* primary button (send) */
+.btnPrimary {
+  width: 100%;
+  padding: 14px;
+  background-color: #dc2626; /* red-600 */
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.05rem;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.btnPrimary:hover:not([disabled]) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.18);
+}
+
+.btnPrimary[disabled] {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* sidebar small cards */
+.sidebarList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.volunteerItem {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px;
+  background: #ecfdf5; /* green-50 */
+  border-radius: 10px;
+}
+
+.volAvatar {
+  width: 40px;
+  height: 40px;
+  background: #16a34a; /* green-500 */
+  color: white;
+  font-weight: 700;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* emergency contacts list inside sidebar */
+.contactsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contactBtn {
+  text-align: left;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #e6eef8;
+  background: #f0f9ff;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.contactBtn:hover {
+  background: #e6f5ff;
+}
+
+.contactTitle {
+  font-weight: 600;
+}
+
+.contactSub {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+/* success screen */
+.successWrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0fdf4; /* green-50 */
+  padding: 32px;
+}
+
+.successCard {
+  background: white;
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 10px 28px rgba(16, 24, 40, 0.06);
+  text-align: center;
+  max-width: 520px;
+}
+
+/* small utility */
+.spaceY4 > * + * { margin-top: 12px; }

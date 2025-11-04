@@ -4,14 +4,12 @@ const VolunteerSchema = new mongoose.Schema({
   name: { type: String, required: true },
   phone: String,
   email: String,
-  city: String,
-  skills: [String],
-  verified: { type: Boolean, default: false },
+  passwordHash: { type: String, required: true }, 
   location: {
     type: { type: String, enum: ['Point'], default: 'Point' },
-    coordinates: { type: [Number], default: undefined } // optional [lng, lat]
+    coordinates: { type: [Number], default: undefined },
   },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
 VolunteerSchema.index({ location: '2dsphere' });

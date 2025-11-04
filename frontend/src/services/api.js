@@ -6,9 +6,12 @@ const api = axios.create({
   baseURL: API_BASE_URL,
 })
 
-// Add auth token to requests
+// Add auth token to requests (for both admin & user tokens)
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('adminToken')
+  const userToken = localStorage.getItem('userToken')
+  const adminToken = localStorage.getItem('adminToken')
+  const token = userToken || adminToken
+  
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -21,7 +24,10 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('adminToken')
-      window.location.href = '/admin/login'
+      localStorage.removeItem('userToken')
+      // Redirect to appropriate login based on current path
+      const isAdminPath = window.location.pathname.startsWith('/admin')
+      window.location.href = isAdminPath ? '/admin/login' : '/user/login'
     }
     return Promise.reject(error)
   }
@@ -57,6 +63,14 @@ export const volunteersAPI = {
 export const authAPI = {
   login: (email, password) => api.post('/admin/login', { email, password }),
   register: (data) => api.post('/admin/register', data)
+}
+
+// User (Volunteer) auth - FIXED: Use individual parameters
+export const userAuth = {
+  register: (name, email, phone, password, location) =>
+    api.post('/volunteers/register', { name, email, phone, password, location }),
+  login: (email, password) =>
+    api.post('/volunteers/login', { email, password }),
 }
 
 export default api

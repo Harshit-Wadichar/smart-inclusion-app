@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const placeController = require('../controllers/placeController');
-const auth = require('../middleware/authMiddleware');
+const {auth, adminAuth} = require('../middleware/authMiddleware');
 
 router.get('/nearby', placeController.getNearby);
 router.get('/', placeController.getAll);
