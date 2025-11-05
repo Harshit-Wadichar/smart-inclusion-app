@@ -115,7 +115,7 @@ const Home = () => {
               <Link to="/map" className="btn btn-primary">Explore Accessible Places</Link>
             </motion.div>
             <motion.div whileHover={hoverScale}>
-              <Link to="/volunteers" className="btn btn-primary">Join Us</Link>
+              <Link to="/volunteers/register" className="btn btn-primary">Join Us</Link>
             </motion.div>
           </motion.div>
         </div>

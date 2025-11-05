@@ -21,7 +21,7 @@ const Navbar = () => {
   const isAdmin = user?.role === "admin";
 
   return (
-    <nav className="navbar">
+    <nav className="navbar" style={{zIndex: "600"}}>
       <div className="navbar-container">
         {/* Logo */}
         <div className="navbar-logo">
